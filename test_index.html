@@ -1,0 +1,88 @@
+<!-- test_index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Rock Dodger Tests</title>
+  <link rel="stylesheet" href="https://unpkg.com/mocha/mocha.css">
+</head>
+<body>
+  <div id="game" style="position: relative; width: 400px; height: 400px;">
+    <div id="dodger" style="position: absolute; bottom: 0px; left: 180px;"></div>
+  </div>
+  <div id="mocha"></div>
+  <script src="https://unpkg.com/mocha/mocha.js"></script>
+  <script src="https://unpkg.com/chai/chai.js"></script>
+  <script>mocha.setup('bdd');</script>
+  <script>
+    // Mock requestAnimationFrame if needed
+    window.requestAnimationFrame = window.requestAnimationFrame || function(cb){ return setTimeout(cb, 16); };
+    window.cancelAnimationFrame = window.cancelAnimationFrame || function(id){ clearTimeout(id); };
+  </script>
+  <script src="index.js"></script>
+  <script>
+    const expect = chai.expect;
+
+    describe('Rock Dodger', function() {
+      let dodger;
+
+      beforeEach(function() {
+        dodger = document.getElementById('dodger');
+        dodger.style.left = '180px';
+      });
+
+      it('should have a dodger element', function() {
+        expect(dodger).to.exist;
+      });
+
+      it('dodger should start at left: 180px', function() {
+        expect(dodger.style.left).to.equal('180px');
+      });
+
+      it('moves dodger left on ArrowLeft', function(done) {
+        const initialLeft = parseInt(dodger.style.left, 10);
+        const event = new KeyboardEvent('keydown', { key: 'ArrowLeft' });
+        document.dispatchEvent(event);
+        setTimeout(function() {
+          const newLeft = parseInt(dodger.style.left, 10);
+          expect(newLeft).to.be.below(initialLeft);
+          done();
+        }, 30);
+      });
+
+      it('moves dodger right on ArrowRight', function(done) {
+        const initialLeft = parseInt(dodger.style.left, 10);
+        const event = new KeyboardEvent('keydown', { key: 'ArrowRight' });
+        document.dispatchEvent(event);
+        setTimeout(function() {
+          const newLeft = parseInt(dodger.style.left, 10);
+          expect(newLeft).to.be.above(initialLeft);
+          done();
+        }, 30);
+      });
+
+      it('does not move dodger past left boundary', function(done) {
+        dodger.style.left = '0px';
+        const event = new KeyboardEvent('keydown', { key: 'ArrowLeft' });
+        document.dispatchEvent(event);
+        setTimeout(function() {
+          expect(dodger.style.left).to.equal('0px');
+          done();
+        }, 30);
+      });
+
+      it('does not move dodger past right boundary', function(done) {
+        dodger.style.left = '360px'; // assuming dodger is 40px wide, game is 400px
+        const event = new KeyboardEvent('keydown', { key: 'ArrowRight' });
+        document.dispatchEvent(event);
+        setTimeout(function() {
+          expect(dodger.style.left).to.equal('360px');
+          done();
+        }, 30);
+      });
+    });
+
+    mocha.run();
+  </script>
+</body>
+</html>
